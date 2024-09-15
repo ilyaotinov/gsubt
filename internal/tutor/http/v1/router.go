@@ -10,9 +10,6 @@ func Handle(r *chi.Mux) *chi.Mux {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Accept", "application/json")
-		_, err := w.Write([]byte(`{"hello": "world"}`))
-		if err != nil {
-		}
 	})
 
 	return r

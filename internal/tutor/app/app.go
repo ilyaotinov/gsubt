@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"multiApp/internal/tutor/config"
 	v1 "multiApp/internal/tutor/http/v1"
 	"net/http"
 	"os"
@@ -17,6 +18,7 @@ import (
 )
 
 type App struct {
+	cfg config.Config
 }
 
 func New() *App {
@@ -24,6 +26,8 @@ func New() *App {
 }
 
 func (a *App) Run() {
+	a.cfg = config.New()
+	fmt.Println(a.cfg.JwtConfig.SecretKey)
 	a.configureLogger()
 	a.startHTTPServer()
 }
