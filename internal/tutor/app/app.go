@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"multiApp/internal/tutor/config"
 	v1 "multiApp/internal/tutor/http/v1"
 	"net/http"
 	"os"
@@ -13,21 +12,60 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
+
 	"github.com/go-chi/chi/v5"
 	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
-	cfg config.Config
+	Cfg       Config
+	Container Container
 }
 
-func New() *App {
-	return &App{}
+func New() (*App, error) {
+	a := &App{}
+	var err error
+	a.Cfg, err = newConfig()
+	if err != nil {
+		return nil, fmt.Errorf("failed init configuration: %w", err)
+	}
+
+	pgConnect, err := a.makePgConnection()
+	if err != nil {
+		return nil, fmt.Errorf("failed perform connection to database: %w", err)
+	}
+
+	container := Container{
+		pgConnect: pgConnect,
+	}
+	a.Container = container
+
+	return a, nil
+}
+
+func (a *App) makePgConnection() (*sqlx.DB, error) {
+	sqlConfig := a.Cfg.SQLConfig
+	conn, err := sqlx.Connect(
+		"postgres",
+		fmt.Sprintf("user=%s dbname=%s password=%s sslmode=%s",
+			sqlConfig.Username,
+			sqlConfig.DatabaseName,
+			sqlConfig.Password,
+			sqlConfig.GetStringSSLMode(),
+		),
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed connect to postgresql datbase: %w", err)
+	}
+
+	return conn, nil
 }
 
 func (a *App) Run() {
-	a.cfg = config.New()
-	fmt.Println(a.cfg.JwtConfig.SecretKey)
+
 	a.configureLogger()
 	a.startHTTPServer()
 }
@@ -43,7 +81,7 @@ func (a *App) startHTTPServer() {
 	r := chi.NewRouter()
 	r = v1.Handle(r)
 	server := http.Server{
-		Addr:    ":3000",
+		Addr:    fmt.Sprintf("%s:%d", a.Cfg.HTTPConfig.Host, a.Cfg.HTTPConfig.Port),
 		Handler: r,
 	}
 

@@ -1,0 +1,11 @@
+jwt:
+  token-exp: 3600
+  secret-key: ssdfsjkdfhwiuefhvhebwvhebrfewhiobfewrbferiubcewribet
+http:
+  port: 3000
+  host: localhost
+db:
+  name: name
+  password: pass
+  ssl-mode: false
+  username: uname
