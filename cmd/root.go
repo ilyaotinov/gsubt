@@ -1,5 +1,6 @@
 /*
-Copyright © 2024 Ilya Otinov <ilya.otinov@gmail.com>
+Package cmd.
+Copyright © 2024 Ilya Otinov <ilya.otinov@gmail.com>.
 */
 package cmd
 
@@ -10,7 +11,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
+// rootCmd represents the base command when called without any subcommands.
 var rootCmd = &cobra.Command{
 	Use:   "subt",
 	Short: "Платформа, где люди могут обучать друг друга.",

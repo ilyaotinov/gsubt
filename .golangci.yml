@@ -6,11 +6,6 @@ run:
   tests: true
   build-tags: [ ]
   # Which dirs to skip: issues from them won't be reported.
-  skip-dirs:
-    - "bin"
-    - "scripts"
-    - ".ci"
-    - ".gradle"
   # Which files to skip: they will be analyzed, but issues from them won't be reported.
   skip-files: [ ]
 
@@ -30,7 +25,9 @@ run:
   # Define the Go version limit.  # Mainly related to generics support since go1.18.  # Default: use Go version from the go.mod file, fallback on the env var `GOVERSION`, fallback on 1.18  # go:
 # Output configuration options
 output:
-  format: json
+  formats:
+    - format: json
+
   # Print lines of code with issue.
   print-issued-lines: true
   # Print linter name in the end of issue text.
@@ -87,43 +84,11 @@ linters-settings:
 
   gocritic:
     enabled-checks:
-      - appendAssign
       - appendCombine
-      - argOrder
-      - assignOp
-      - badCall
-      - badCond
-      - captLocal
-      - caseOrder
-      - commentFormatting
-      - defaultCaseOrder
-      - deprecatedComment
-      - dupArg
-      - dupBranchBody
-      - dupCase
-      - dupSubExpr
-      - elseif
-      - exitAfterDefer
-      - flagDeref
-      - flagName
-      - ifElseChain
       - indexAlloc
-      - mapKey
-      - newDeref
-      - offBy1
       - rangeExprCopy
       - rangeValCopy
-      - regexpMust
-      - singleCaseSwitch
-      - sloppyLen
       - stringXbytes
-      - switchTrue
-      - typeSwitchVar
-      - underef
-      - unlambda
-      - unslice
-      - valSwap
-      - wrapperFunc
 
   godot:
     capital: true
@@ -137,7 +102,7 @@ linters-settings:
   goimports:
     local-prefixes: ""
 
-  gomnd:
+  mnd:
     checks:
       - argument
       - case
@@ -358,7 +323,6 @@ linters:
     - errcheck
     - errname
     - errorlint
-    - execinquery
     - exhaustive
     - gocheckcompilerdirectives
     - goconst
@@ -366,7 +330,7 @@ linters:
     - godot
     - gofmt
     - goimports
-    - gomnd
+    - mnd
     - goprintffuncname
     - gosec
     - gosimple
@@ -405,6 +369,11 @@ linters:
 # Issues configuration
 issues:
   exclude: [ ]
+  exclude-dirs:
+    - "bin"
+    - "scripts"
+    - ".ci"
+    - ".gradle"
   exclude-case-sensitive: false
   exclude-rules:
     - path: "_test\\.go"

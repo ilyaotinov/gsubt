@@ -6,8 +6,9 @@ const (
 )
 
 type User struct {
-	Name    string
-	Surname string
-	Login   string
-	ID      uint
+	Name    string `db:"name"`
+	Surname string `db:"surname"`
+	Login   string `db:"login"`
+	Email   string `db:"email"`
+	ID      uint   `db:"id"`
 }
