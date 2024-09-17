@@ -6,9 +6,15 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	defaultTimeoutOnStop = 5
+	defaultJWTExp        = 3600
+	defaultHTTPPort      = 3000
+)
+
 type JWTConfig struct {
-	Exp       uint
 	SecretKey string
+	Exp       uint
 }
 
 type SQLConfig struct {
@@ -19,8 +25,9 @@ type SQLConfig struct {
 }
 
 type HTTPConfig struct {
-	Host string
-	Port uint
+	Host          string
+	Port          uint
+	TimeoutOnStop int
 }
 
 func (sqlConf *SQLConfig) GetStringSSLMode() string {
@@ -38,10 +45,11 @@ type Config struct {
 }
 
 func newConfig() (Config, error) {
-	viper.SetDefault("jwt.token-exp", 3600)
+	viper.SetDefault("jwt.token-exp", defaultJWTExp)
 	viper.SetDefault("db.ssl-mode", false)
-	viper.SetDefault("http.port", 3000)
+	viper.SetDefault("http.port", defaultHTTPPort)
 	viper.SetDefault("http.host", "")
+	viper.SetDefault("http.timeout-on-stop", defaultTimeoutOnStop)
 
 	viper.SetConfigFile(viper.GetString("config-file-path"))
 	if err := viper.ReadInConfig(); err != nil {
@@ -60,8 +68,9 @@ func newConfig() (Config, error) {
 			SSLMode:      viper.GetBool("db.ssl-mode"),
 		},
 		HTTPConfig: HTTPConfig{
-			Port: viper.GetUint("http.port"),
-			Host: viper.GetString("http.host"),
+			Port:          viper.GetUint("http.port"),
+			Host:          viper.GetString("http.host"),
+			TimeoutOnStop: viper.GetInt("http.timeout-on-stop"),
 		},
 	}, nil
 }

@@ -7,7 +7,6 @@ run:
   build-tags: [ ]
   # Which dirs to skip: issues from them won't be reported.
   # Which files to skip: they will be analyzed, but issues from them won't be reported.
-  skip-files: [ ]
 
   # Invariable parameters #
 

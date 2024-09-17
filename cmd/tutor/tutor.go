@@ -8,6 +8,11 @@ import (
 	"github.com/spf13/viper"
 )
 
+const (
+	defaultJwtTokenExpInSeconds = 3600
+	configFilePathOption        = "config-file-path"
+)
+
 var Cmd = &cobra.Command{
 	Use:   "serve-http",
 	Short: "Запустить сервер с приложением.",
@@ -30,14 +35,14 @@ func init() {
 	Cmd.
 		Flags().
 		String("secret-key", "", "Secret key for encrypt auth token.")
-	viper.BindPFlag("secret-key", Cmd.Flags().Lookup("secret-key"))
+	_ = viper.BindPFlag("secret-key", Cmd.Flags().Lookup("secret-key"))
 	Cmd.
 		Flags().
-		Uint("token-exp", 3600, "Time in seconds for jwt token would live.")
-	viper.BindPFlag("token-exp", Cmd.Flags().Lookup("token-exp"))
+		Uint("token-exp", defaultJwtTokenExpInSeconds, "Time in seconds for jwt token would live.")
+	_ = viper.BindPFlag("token-exp", Cmd.Flags().Lookup("token-exp"))
 	Cmd.
 		Flags().
-		String("config-file-path", "", "Path to config file")
-	Cmd.MarkFlagRequired("config-file-path")
-	viper.BindPFlag("config-file-path", Cmd.Flags().Lookup("config-file-path"))
+		String(configFilePathOption, "", "Path to config file")
+	_ = Cmd.MarkFlagRequired(configFilePathOption)
+	_ = viper.BindPFlag(configFilePathOption, Cmd.Flags().Lookup(configFilePathOption))
 }

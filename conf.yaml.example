@@ -4,6 +4,7 @@ jwt:
 http:
   port: 3000
   host: localhost
+  timeout-on-stop: 5
 db:
   name: name
   password: pass

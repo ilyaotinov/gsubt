@@ -20,8 +20,8 @@ import (
 )
 
 type App struct {
-	Cfg       Config
 	Container Container
+	Cfg       Config
 }
 
 func New() (*App, error) {
@@ -65,7 +65,6 @@ func (a *App) makePgConnection() (*sqlx.DB, error) {
 }
 
 func (a *App) Run() {
-
 	a.configureLogger()
 	a.startHTTPServer()
 }
@@ -100,7 +99,10 @@ func (a *App) startHTTPServer() {
 
 	g.Go(func() error {
 		<-ctx.Done()
-		timeoutContext, timeoutCancel := context.WithTimeout(context.Background(), time.Second*5)
+		timeoutContext, timeoutCancel := context.WithTimeout(
+			context.Background(),
+			time.Second*time.Duration(a.Cfg.HTTPConfig.TimeoutOnStop),
+		)
 		defer timeoutCancel()
 		if err := server.Shutdown(timeoutContext); err != nil {
 			return fmt.Errorf("failed gracefull shutdown server: %w", err)
