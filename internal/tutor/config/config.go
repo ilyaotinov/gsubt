@@ -1,4 +1,4 @@
-package app
+package config
 
 import (
 	"fmt"
@@ -12,39 +12,13 @@ const (
 	defaultHTTPPort      = 3000
 )
 
-type JWTConfig struct {
-	SecretKey string
-	Exp       uint
-}
-
-type SQLConfig struct {
-	DatabaseName string
-	Username     string
-	Password     string
-	SSLMode      bool
-}
-
-type HTTPConfig struct {
-	Host          string
-	Port          uint
-	TimeoutOnStop int
-}
-
-func (sqlConf *SQLConfig) GetStringSSLMode() string {
-	if sqlConf.SSLMode {
-		return "enable"
-	}
-
-	return "disable"
-}
-
 type Config struct {
 	JwtConfig  JWTConfig
 	SQLConfig  SQLConfig
 	HTTPConfig HTTPConfig
 }
 
-func newConfig() (Config, error) {
+func New() (Config, error) {
 	viper.SetDefault("jwt.token-exp", defaultJWTExp)
 	viper.SetDefault("db.ssl-mode", false)
 	viper.SetDefault("http.port", defaultHTTPPort)

@@ -2,32 +2,29 @@ package app
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
-	v1 "multiApp/internal/tutor/http/v1"
-	"net/http"
+	"multiApp/internal/tutor/config"
+	"multiApp/internal/tutor/handler/ihttp"
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 
-	"github.com/go-chi/chi/v5"
 	"golang.org/x/sync/errgroup"
 )
 
 type App struct {
 	Container Container
-	Cfg       Config
+	Cfg       config.Config
 }
 
 func New() (*App, error) {
 	a := &App{}
 	var err error
-	a.Cfg, err = newConfig()
+	a.Cfg, err = config.New()
 	if err != nil {
 		return nil, fmt.Errorf("failed init configuration: %w", err)
 	}
@@ -77,21 +74,17 @@ func (a *App) configureLogger() {
 func (a *App) startHTTPServer() {
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer cancel()
-	r := chi.NewRouter()
-	r = v1.Handle(r)
-	server := http.Server{
-		Addr:    fmt.Sprintf("%s:%d", a.Cfg.HTTPConfig.Host, a.Cfg.HTTPConfig.Port),
-		Handler: r,
-	}
+
+	serv := ihttp.New(a.Cfg.HTTPConfig)
+
+	r := ihttp.NewRouter()
+	serv.RegisterHandler(r)
 
 	g := &errgroup.Group{}
 
 	g.Go(func() error {
-		slog.Info("HTTP server is starting...")
-		if err := server.ListenAndServe(); err != nil {
-			if !errors.Is(err, http.ErrServerClosed) {
-				return fmt.Errorf("failed start server on port %s: %w", ":3000", err)
-			}
+		if err := serv.StartAndListen(); err != nil {
+			return fmt.Errorf("failed start http server: %w", err)
 		}
 
 		return nil
@@ -99,16 +92,9 @@ func (a *App) startHTTPServer() {
 
 	g.Go(func() error {
 		<-ctx.Done()
-		timeoutContext, timeoutCancel := context.WithTimeout(
-			context.Background(),
-			time.Second*time.Duration(a.Cfg.HTTPConfig.TimeoutOnStop),
-		)
-		defer timeoutCancel()
-		if err := server.Shutdown(timeoutContext); err != nil {
-			return fmt.Errorf("failed gracefull shutdown server: %w", err)
+		if err := serv.Shutdown(); err != nil {
+			return fmt.Errorf("failed shutdown server: %w", err)
 		}
-
-		slog.Info("server was gracefully shutdown")
 
 		return nil
 	})
